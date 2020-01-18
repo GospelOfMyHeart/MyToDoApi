@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyToDoApi.Models;
 using System;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MyToDoApi.Entities
 {
-    public class TodoContext : DbContext
+    public class TodoContext : IdentityDbContext<AppUser>
     {
         public TodoContext(DbContextOptions<TodoContext> options) : base(options)
         {
