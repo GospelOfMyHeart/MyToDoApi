@@ -1,7 +1,9 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +14,7 @@ using MyToDoApi.Entities;
 using MyToDoApi.Helpers;
 using MyToDoApi.Models;
 using System;
+using System.Net;
 using System.Text;
 
 namespace MyToDoApi
@@ -35,7 +38,7 @@ namespace MyToDoApi
             services.AddSingleton<IJwtFactory, JwtFactory>();
 
             services.AddAutoMapper(typeof(Startup));
-           // services.AddControllersWithViews();
+            services.AddControllers();
             services.AddCors(options =>
             {
                 options.AddPolicy(MyAllowSpecificOrigins,
@@ -48,8 +51,14 @@ namespace MyToDoApi
                    // builder
                 });
             });
+            services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("TodoApiContext")));
 
 
+            //JWT authorization
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///
+
+            //Saving parameters from configuration file to JWTIssuerOptions class
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTIssuerOptions));
 
             services.Configure<JWTIssuerOptions>(options =>
@@ -59,10 +68,8 @@ namespace MyToDoApi
                 options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });
 
-
-
-
-            var validationToken = new TokenValidationParameters()
+            //generating validation token parameters that will have each token
+            var validationTokenParameters = new TokenValidationParameters()
             {
                 ValidateIssuer = true,
                 ValidIssuer = jwtAppSettingOptions[nameof(JWTIssuerOptions.Issuer)],
@@ -77,32 +84,45 @@ namespace MyToDoApi
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };
+           
+            //adding jwt authentication to middleware. Setting token validationParameters
 
-
-
-
-            services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("TodoApiContext")));
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                     .AddJwtBearer(options =>
                 {
                     options.ClaimsIssuer = jwtAppSettingOptions[nameof(JWTIssuerOptions.Issuer)];
-                    options.TokenValidationParameters = validationToken;
+                    options.TokenValidationParameters = validationTokenParameters;
                     options.SaveToken = true;
                 }
             );
 
+            //setting what roles can access to policy. Controller or action must be marked this this policy name 
+            //(i.e. [Authorize(Policy = "ApiUser")] for AddPolicy("ApiUser",callback(policy)), 
+            //where "policy" parameter allow to require claim where must be specified claim "Role", for example, 
+            //and it should have someking of role that will be allowed marked controller or action).
             // api user claim policy
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
             });
-
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             //middleware for identity
-            services.AddIdentity<AppUser, IdentityRole>()
-       .AddEntityFrameworkStores<TodoContext>()
-       .AddDefaultTokenProviders();
-            services.AddControllers();
+            var builder = services.AddIdentityCore<AppUser>(o =>
+            {
+                // configure identity options
+                o.Password.RequireDigit = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequiredLength = 6;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
+            builder.AddEntityFrameworkStores<TodoContext>().AddDefaultTokenProviders();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -114,14 +134,30 @@ namespace MyToDoApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            app.UseExceptionHandler(
+            builder =>
+        {
+            builder.Run(
+                        async context =>
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+                        if (error != null)
+                        {
+                            context.Response.AddApplicationError(error.Error.Message);
+                            await context.Response.WriteAsync(error.Error.Message).ConfigureAwait(false);
+                        }
+                    });
+        });
+
+   //         app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors(MyAllowSpecificOrigins);
-
-
             app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseCors(MyAllowSpecificOrigins);
 
 
             app.UseEndpoints(endpoints =>

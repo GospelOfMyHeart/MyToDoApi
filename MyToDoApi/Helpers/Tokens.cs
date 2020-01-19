@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MyToDoApi.Helpers
 {
+    /// <summary>
+    /// Class for genereting response with JWT
+    /// </summary>
     public class Tokens
     {
         public static async Task<string> GenerateJwt(ClaimsIdentity identity, IJwtFactory jwtFactory, string userName, JWTIssuerOptions jwtOptions, JsonSerializerSettings serializerSettings)

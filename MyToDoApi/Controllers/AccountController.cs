@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ namespace MyToDoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class AccountController:ControllerBase
     {
  
@@ -36,6 +38,7 @@ namespace MyToDoApi.Controllers
             _jwtFactory = jwtFactory;
             _jwtOptions = jwtOptions.Value;
         }
+        
         [HttpPost("registration")]
         async public Task<IActionResult> Post([FromBody] RegistrationViewModel model)
         {
