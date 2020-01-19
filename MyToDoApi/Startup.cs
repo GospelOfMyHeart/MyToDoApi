@@ -98,7 +98,7 @@ namespace MyToDoApi
             });
 
 
-            //todo: add middleware for identity
+            //middleware for identity
             services.AddIdentity<AppUser, IdentityRole>()
        .AddEntityFrameworkStores<TodoContext>()
        .AddDefaultTokenProviders();
