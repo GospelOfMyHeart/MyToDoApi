@@ -10,7 +10,7 @@ import 'rxjs/add/observable/throw';
 import { SessionService } from './session.service';
 
 const API_URL = environment.apiUrl+"/todoes";
-const API_AUTHORIZATION_URL = environment.apiUrl+"/account";
+const API_AUTHORIZATION_URL = environment.apiUrl+ "/account";
 
 @Injectable()
 export class ApiService {
@@ -20,8 +20,7 @@ export class ApiService {
   constructor(
     private http: HttpClient,
     private session: SessionService
-  ) {
-    
+  ) {    
   }
   public signIn(username: string, password: string) : any{
     return this.http
@@ -37,7 +36,7 @@ export class ApiService {
    public getAllTodos(): Observable<Todo[]> {
     return this.http
 
-      .get<Todo[]>(API_URL,{ headers: this.getRequestHeaders()})
+      .get<Todo[]>(API_URL, { headers: this.options})
       .catch(this.handleError);
   }
 
@@ -72,7 +71,7 @@ export class ApiService {
     return Observable.throw(error);
   }
 
-  private getRequestHeaders() {
+  private getRequestHeaders() : HttpHeaders {
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + this.session.accessToken
     });
