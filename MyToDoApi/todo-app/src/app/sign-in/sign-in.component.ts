@@ -54,8 +54,8 @@ export class SignInComponent implements OnInit {
       .subscribe(
         (response) => {
           this.auth.doSignIn(
-            response.token,
-            response.name
+            response.auth_token,
+            response.id
           );
           this.router.navigate(['todos']);
         },

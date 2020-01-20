@@ -1,3 +1,4 @@
+import { CanActivateTodosGuard } from './can-activate-todos.guard';
 import { AuthService } from './auth.service';
 import { SessionService } from './session.service';
 import { AppRoutingModule } from './app-routing/app-routing.module';
@@ -35,7 +36,7 @@ import { SignInComponent } from './sign-in/sign-in.component';
     HttpClientModule,
     ReactiveFormsModule
   ],
-  providers: [TodoDataService, ApiService, SessionService,AuthService],
+  providers: [TodoDataService, ApiService, SessionService,AuthService, CanActivateTodosGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -7,19 +7,25 @@ import { Observable } from 'rxjs';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
+import { SessionService } from './session.service';
 
 const API_URL = environment.apiUrl+"/todoes";
+const API_AUTHORIZATION_URL = environment.apiUrl+"/account";
 
 @Injectable()
 export class ApiService {
 
+   options : HttpHeaders =  this.getRequestHeaders();
+
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private session: SessionService
   ) {
+    
   }
   public signIn(username: string, password: string) : any{
     return this.http
-      .post(API_URL + '/sign-in', {
+      .post(API_AUTHORIZATION_URL + '/login', {
         username,
         password
       })
@@ -30,7 +36,8 @@ export class ApiService {
    // API: GET /todos
    public getAllTodos(): Observable<Todo[]> {
     return this.http
-      .get<Todo[]>(API_URL)
+
+      .get<Todo[]>(API_URL,{ headers: this.getRequestHeaders()})
       .catch(this.handleError);
   }
 
@@ -63,5 +70,12 @@ export class ApiService {
   private handleError (error: Response | any) {
     console.error('ApiService::handleError', error);
     return Observable.throw(error);
+  }
+
+  private getRequestHeaders() {
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + this.session.accessToken
+    });
+    return headers;
   }
 }

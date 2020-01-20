@@ -1,3 +1,4 @@
+import { CanActivateTodosGuard } from './../can-activate-todos.guard';
 import { PageNotFoundComponent } from './../page-not-found/page-not-found.component';
 import { TodosComponent } from './../todos/todos.component';
 import { NgModule } from '@angular/core';
@@ -18,6 +19,9 @@ const routes: Routes = [
   {
     path: 'todos',
     component: TodosComponent,
+    canActivate:[
+      CanActivateTodosGuard
+    ],
     resolve: {
       todos: TodosResolver
     }

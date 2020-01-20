@@ -152,13 +152,13 @@ namespace MyToDoApi
                     });
         });
 
-   //         app.UseHttpsRedirection();
-
+            //         app.UseHttpsRedirection();
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             
-            app.UseCors(MyAllowSpecificOrigins);
+            
 
 
             app.UseEndpoints(endpoints =>
