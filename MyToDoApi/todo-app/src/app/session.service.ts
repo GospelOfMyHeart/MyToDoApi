@@ -3,14 +3,28 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class SessionService {
 
-  public accessToken: string;
-  public name: string;
+  private accessTokenKey:string ='token';
+  private nameKey:string = 'name';
 
   constructor() {
   }
 
+  setAccessToken(token:string){
+    localStorage.setItem(this.accessTokenKey, token);
+
+  }
+  setName(name:string){
+    localStorage.setItem(this.nameKey, name);
+  }
+  getAccessToken():string{
+    return localStorage.getItem(this.accessTokenKey);
+  }
+  getName():string{
+    return localStorage.getItem(this.nameKey);
+  }
+
   public destroy(): void {
-    this.accessToken = null;
-    this.name = null;
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.nameKey);
   }
 }

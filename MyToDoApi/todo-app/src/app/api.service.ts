@@ -15,7 +15,7 @@ const API_AUTHORIZATION_URL = environment.apiUrl+ "/account";
 @Injectable()
 export class ApiService {
 
-   options : HttpHeaders =  this.getRequestHeaders();
+   options : HttpHeaders;
 
   constructor(
     private http: HttpClient,
@@ -34,6 +34,7 @@ export class ApiService {
 
    // API: GET /todos
    public getAllTodos(): Observable<Todo[]> {
+     this.options =   this.getRequestHeaders();
     return this.http
 
       .get<Todo[]>(API_URL, { headers: this.options})
@@ -73,7 +74,7 @@ export class ApiService {
 
   private getRequestHeaders() : HttpHeaders {
     const headers = new HttpHeaders({
-      'Authorization': 'Bearer ' + this.session.accessToken
+      'Authorization': 'Bearer ' + this.session.getAccessToken()
     });
     return headers;
   }

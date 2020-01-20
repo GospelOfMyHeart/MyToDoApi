@@ -4,13 +4,16 @@ import { SessionService } from './session.service';
 @Injectable()
 export class AuthService {
 
+  private token: string = 'Token';
+  private name: string = 'Name';
+
   constructor(
     private session: SessionService,
   ) {
   }
 
   public isSignedIn() {
-    return !!this.session.accessToken;
+    return !!this.session.getAccessToken();
   }
 
   public doSignOut() {
@@ -21,8 +24,9 @@ export class AuthService {
     if ((!accessToken) || (!name)) {
       return;
     }
-    this.session.accessToken = accessToken;
-    this.session.name = name;
+    this.session.setAccessToken( accessToken);
+    this.session.setName(name);
+
   }
 
 }

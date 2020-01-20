@@ -1,3 +1,4 @@
+import { LoginCheckGuard } from './../login-check.guard';
 import { CanActivateTodosGuard } from './../can-activate-todos.guard';
 import { PageNotFoundComponent } from './../page-not-found/page-not-found.component';
 import { TodosComponent } from './../todos/todos.component';
@@ -9,12 +10,15 @@ import { SignInComponent } from '../sign-in/sign-in.component';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'sign-in',
+    redirectTo: 'todos',
     pathMatch: 'full'
   },
   {
     path: 'sign-in',
-    component: SignInComponent
+    component: SignInComponent,
+    canActivate:[
+      LoginCheckGuard
+    ]
   },
   {
     path: 'todos',

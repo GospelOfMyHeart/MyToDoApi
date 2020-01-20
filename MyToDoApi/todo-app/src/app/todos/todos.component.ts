@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { TodoDataService } from '../todo-data.service';
 import { Todo } from '../todo';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs/operators';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-todos',
@@ -15,7 +16,9 @@ export class TodosComponent implements OnInit {
 
   constructor(
     private todoDataService: TodoDataService,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private auth: AuthService,
+    private router: Router) {
  }
  public ngOnInit() {
    this.route.data.pipe(map((data) => {
@@ -59,4 +62,8 @@ export class TodosComponent implements OnInit {
      }
    );
  }
+ doSignOut() {
+  this.auth.doSignOut();
+  this.router.navigate(['/sign-in']);
+}
 }
